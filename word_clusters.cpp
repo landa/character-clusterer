@@ -101,7 +101,7 @@ void clearCanvas() {
 
 // --- Clusterer ---------------------------------------------------------------
 
-Character firstCharacter(Word const word) {
+Character firstCharacter(Word& word) {
   int x = std::numeric_limits<int>::max();
   Character first = word.characters[0];
   for (size_t ii = 0; ii < word.characters.size(); ++ii) {
@@ -113,7 +113,7 @@ Character firstCharacter(Word const word) {
   return first;
 }
 
-Character lastCharacter(Word const word) {
+Character lastCharacter(Word& word) {
   int x = std::numeric_limits<int>::min();
   Character last = word.characters[0];
   for (size_t ii = 0; ii < word.characters.size(); ++ii) {
@@ -125,7 +125,7 @@ Character lastCharacter(Word const word) {
   return last;
 }
 
-double bottomEdge(Word const word) {
+double bottomEdge(Word& word) {
   double y = std::numeric_limits<int>::min();
   for (size_t ii = 0; ii < word.characters.size(); ++ii) {
     if (word.characters[ii].rect.y + word.characters[ii].rect.height > y) {
@@ -135,7 +135,7 @@ double bottomEdge(Word const word) {
   return y;
 }
 
-double topEdge(Word const word) {
+double topEdge(Word& word) {
   double y = std::numeric_limits<int>::max();
   for (size_t ii = 0; ii < word.characters.size(); ++ii) {
     if (word.characters[ii].rect.y + word.characters[ii].rect.height < y) {
@@ -145,7 +145,7 @@ double topEdge(Word const word) {
   return y;
 }
 
-double characterHorizontalDistance(Character const a, Character const b) {
+double characterHorizontalDistance(Character a, Character b) {
   return MIN(
           MIN(
             abs((a.rect.x) - (b.rect.x)),
@@ -158,7 +158,7 @@ double characterHorizontalDistance(Character const a, Character const b) {
          );
 }
 
-double wordHorizontalDistance(Word const a, Word const b) {
+double wordHorizontalDistance(Word& a, Word& b) {
   return MIN(
           MIN(characterHorizontalDistance(firstCharacter(a), lastCharacter(b)),
              characterHorizontalDistance(firstCharacter(b), lastCharacter(a))),
@@ -167,14 +167,14 @@ double wordHorizontalDistance(Word const a, Word const b) {
          );
 }
 
-double wordVerticalDistance(Word const a, Word const b) {
+double wordVerticalDistance(Word& a, Word& b) {
   return MIN(
           MIN(abs(topEdge(a) - bottomEdge(b)), abs(topEdge(b) - bottomEdge(a))),
           MIN(abs(topEdge(a) - topEdge(b)), abs(bottomEdge(b) - bottomEdge(a)))
          );
 }
 
-double distance(Word const a, Word const b) {
+double distance(Word& a, Word& b) {
   // Two words are similar (and should be merged) if:
   //  - They're on the same horizontal line
   //  - Their edges are close together:
@@ -226,9 +226,9 @@ std::vector<Word> clusterCharacters(std::vector<Character> characters) {
       }
     }
     if (best_distance <= MAX_DISTANCE) {
-      std::cerr << "Combining " << getWordString(words[word1idx]);
-      std::cerr << " and " << getWordString(words[word2idx]);
-      std::cerr << " (distance = " << best_distance << ")" << std::endl;
+      // std::cerr << "Combining " << getWordString(words[word1idx]);
+      // std::cerr << " and " << getWordString(words[word2idx]);
+      // std::cerr << " (distance = " << best_distance << ")" << std::endl;
       words = mergeWords(words, word1idx, word2idx);
     } else {
       std::cerr << "No more similar words -- breaking after " << ii << " iterations!" << std::endl;
@@ -306,7 +306,7 @@ void testHorizontalWords() {
 void runTests() {
   // testDistances();
   // testVerticalStack();
-  testHorizontalWords();
+  // testHorizontalWords();
 }
 
 // --- Main --------------------------------------------------------------------
