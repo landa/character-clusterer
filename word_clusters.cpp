@@ -101,28 +101,28 @@ void clearCanvas() {
 
 // --- Clusterer ---------------------------------------------------------------
 
-Character firstCharacter(Word& word) {
+Character& firstCharacter(Word& word) {
   int x = std::numeric_limits<int>::max();
-  Character first = word.characters[0];
+  Character* first = &word.characters[0];
   for (size_t ii = 0; ii < word.characters.size(); ++ii) {
     if (word.characters[ii].rect.x < x) {
-      first = word.characters[ii];
-      x = first.rect.x;
+      first = &word.characters[ii];
+      x = first->rect.x;
     }
   }
-  return first;
+  return *first;
 }
 
-Character lastCharacter(Word& word) {
+Character& lastCharacter(Word& word) {
   int x = std::numeric_limits<int>::min();
-  Character last = word.characters[0];
+  Character* last = &word.characters[0];
   for (size_t ii = 0; ii < word.characters.size(); ++ii) {
     if (word.characters[ii].rect.x > x) {
-      last = word.characters[ii];
-      x = last.rect.x;
+      last = &word.characters[ii];
+      x = last->rect.x;
     }
   }
-  return last;
+  return *last;
 }
 
 double bottomEdge(Word& word) {
