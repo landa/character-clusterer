@@ -10,7 +10,7 @@
 
 int MAX_DISTANCE = 10000.0;
 const int MAX_ITERATIONS = 1000;
-const double VERTICAL_SCALING = 3.0;
+const double VERTICAL_SCALING = 1.0;
 
 const int UNASSIGNED_GROUP = 0;
 
@@ -149,8 +149,12 @@ double characterHorizontalDistance(Character const a, Character const b) {
 }
 
 double wordHorizontalDistance(Word const a, Word const b) {
-  return MIN(characterHorizontalDistance(firstCharacter(a), lastCharacter(b)),
-             characterHorizontalDistance(firstCharacter(b), lastCharacter(a)));
+  return MIN(
+          MIN(characterHorizontalDistance(firstCharacter(a), lastCharacter(b)),
+             characterHorizontalDistance(firstCharacter(b), lastCharacter(a))),
+          MIN(characterHorizontalDistance(firstCharacter(a), firstCharacter(b)),
+             characterHorizontalDistance(lastCharacter(a), lastCharacter(b)))
+         );
 }
 
 double wordVerticalDistance(Word const a, Word const b) {
@@ -165,7 +169,6 @@ double distance(Word const a, Word const b) {
   //      Word b's left char is close to Word a's right char
   double horizontal_distance = wordHorizontalDistance(a, b);
   double vertical_distance = VERTICAL_SCALING*wordVerticalDistance(a, b);
-  // std::cerr << "h,v: " << horizontal_distance << "," << vertical_distance << std::endl;
   return pow(pow(horizontal_distance, 2) + pow(vertical_distance, 2), 0.5);
 }
 
@@ -232,10 +235,11 @@ std::vector<Word> clusterCharacters(std::vector<Character> characters) {
 // --- Tests -------------------------------------------------------------------
 
 void testDistances() {
+  std::cerr << std::endl << "--- Test distances ------------------" << std::endl;
   Word wa, wb;
-  std::vector<Character> ca = generateCharacters("ab", 800+CHARACTER_WIDTH, 500);
+  std::vector<Character> ca = generateCharacters("ab", 800, 500);
   wa.characters = ca;
-  std::vector<Character> cb = generateCharacters("cde", 800, 500+CHARACTER_HEIGHT);
+  std::vector<Character> cb = generateCharacters("cde", 800, 500);
   wb.characters = cb;
 
   std::cerr << "Horizontal distance: " << wordHorizontalDistance(wa, wb) << std::endl;
@@ -243,8 +247,31 @@ void testDistances() {
   std::cerr << "Total distance: " << distance(wa, wb) << std::endl;
 }
 
+void testVerticalStack() {
+  std::cerr << std::endl << "--- Test vertical stack -------------" << std::endl;
+  // Three "Vest3" words, one below the other
+  // Combining the two top ones should give the same distance to the
+  // bottom one as the distance between the bottom one and the one
+  // above it.
+  Word wa, wb, wc, wab;
+  std::vector<Character> ca = generateCharacters("Vest3", 500, 300);
+  wa.characters = ca;
+  std::vector<Character> cb = generateCharacters("Vest3", 500, 320);
+  wb.characters = cb;
+  std::vector<Character> cc = generateCharacters("Vest3", 500, 340);
+  wc.characters = cc;
+  wab.characters.insert(wab.characters.end(), ca.begin(), ca.end());
+  wab.characters.insert(wab.characters.end(), cb.begin(), cb.end());
+
+  std::cerr << "a,b distance (should be 20): " << distance(wa, wb) << std::endl;
+  std::cerr << "b,c distance (should be 20): " << distance(wb, wc) << std::endl;
+  std::cerr << "a,c distance (should be 40): " << distance(wa, wc) << std::endl;
+  std::cerr << "ab,c distance (should be 20): " << distance(wab, wc) << std::endl;
+}
+
 void runTests() {
   testDistances();
+  testVerticalStack();
 }
 
 // --- Main --------------------------------------------------------------------
