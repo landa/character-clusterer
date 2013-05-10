@@ -8,9 +8,9 @@
 
 // --- Clustering Parameters ---------------------------------------------------
 
-int MAX_DISTANCE = 10000.0;
+int MAX_DISTANCE = 35.0;
 const int MAX_ITERATIONS = 1000;
-const double VERTICAL_SCALING = 1.0;
+const double VERTICAL_SCALING = 1.5;
 
 const int UNASSIGNED_GROUP = 0;
 
@@ -54,6 +54,7 @@ const cv::Scalar COLORS[] = { GREY, rc(), rc(), rc(), rc(), rc(), rc(), rc(),
 
 const int CHARACTER_WIDTH = 30;
 const int CHARACTER_HEIGHT = 40;
+const int CHARACTER_SEPARATION = 35;
 
 // --- Helper Methods (Testing and Visualization) ------------------------------
 
@@ -61,7 +62,7 @@ std::vector<Character> generateCharacters(char* str, int offset_x, int offset_y)
   std::vector<Character> characters;
   for (size_t ii = 0; ii < strlen(str); ++ii) {
     Character cur;
-    cur.rect = cv::Rect(offset_x + ii*35, offset_y, CHARACTER_WIDTH, CHARACTER_HEIGHT);
+    cur.rect = cv::Rect(offset_x + ii*CHARACTER_SEPARATION, offset_y, CHARACTER_WIDTH, CHARACTER_HEIGHT);
     cur.value = str[ii];
     cur.group = UNASSIGNED_GROUP;
     characters.push_back(cur);
@@ -145,7 +146,16 @@ double topEdge(Word const word) {
 }
 
 double characterHorizontalDistance(Character const a, Character const b) {
-  return abs((a.rect.x+a.rect.width/2) - (b.rect.x+b.rect.width/2));
+  return MIN(
+          MIN(
+            abs((a.rect.x) - (b.rect.x)),
+            abs((a.rect.x+a.rect.width) - (b.rect.x))
+          ),
+          MIN(
+            abs((a.rect.x+a.rect.width) - (b.rect.x+b.rect.width)),
+            abs((a.rect.x) - (b.rect.x+b.rect.width))
+          )
+         );
 }
 
 double wordHorizontalDistance(Word const a, Word const b) {
@@ -158,7 +168,10 @@ double wordHorizontalDistance(Word const a, Word const b) {
 }
 
 double wordVerticalDistance(Word const a, Word const b) {
-  return MIN(abs(topEdge(a) - bottomEdge(b)), abs(topEdge(b) - bottomEdge(a)));
+  return MIN(
+          MIN(abs(topEdge(a) - bottomEdge(b)), abs(topEdge(b) - bottomEdge(a))),
+          MIN(abs(topEdge(a) - topEdge(b)), abs(bottomEdge(b) - bottomEdge(a)))
+         );
 }
 
 double distance(Word const a, Word const b) {
@@ -263,15 +276,37 @@ void testVerticalStack() {
   wab.characters.insert(wab.characters.end(), ca.begin(), ca.end());
   wab.characters.insert(wab.characters.end(), cb.begin(), cb.end());
 
-  std::cerr << "a,b distance (should be 20): " << distance(wa, wb) << std::endl;
-  std::cerr << "b,c distance (should be 20): " << distance(wb, wc) << std::endl;
-  std::cerr << "a,c distance (should be 40): " << distance(wa, wc) << std::endl;
-  std::cerr << "ab,c distance (should be 20): " << distance(wab, wc) << std::endl;
+  std::cerr << "a,b distance: " << distance(wa, wb) << std::endl;
+  std::cerr << "b,c distance: " << distance(wb, wc) << std::endl;
+  std::cerr << "a,c distance: " << distance(wa, wc) << std::endl;
+  std::cerr << "ab,c distance: " << distance(wab, wc) << std::endl;
+}
+
+void testHorizontalWords() {
+  std::cerr << std::endl << "--- Test horizontal words -----------" << std::endl;
+  // The characters of the word "Ves"
+  // The distances between the characters should be lower than the
+  // vertical separation from testVerticalStack.
+  Word wa, wb, wc, wabc;
+  std::vector<Character> ca = generateCharacters("V", 500, 300);
+  wa.characters = ca;
+  std::vector<Character> cb = generateCharacters("e", 500+CHARACTER_SEPARATION, 300);
+  wb.characters = cb;
+  std::vector<Character> cc = generateCharacters("s", 500+CHARACTER_SEPARATION*2, 300);
+  wc.characters = cc;
+  wabc.characters.insert(wabc.characters.end(), ca.begin(), ca.end());
+  wabc.characters.insert(wabc.characters.end(), cb.begin(), cb.end());
+  wabc.characters.insert(wabc.characters.end(), cc.begin(), cc.end());
+
+  std::cerr << "V,e distance: " << wordHorizontalDistance(wa, wb) << std::endl;
+  std::cerr << "e,s distance: " << wordHorizontalDistance(wb, wc) << std::endl;
+  std::cerr << "V,s distance: " << wordHorizontalDistance(wa, wc) << std::endl;
 }
 
 void runTests() {
-  testDistances();
-  testVerticalStack();
+  // testDistances();
+  // testVerticalStack();
+  testHorizontalWords();
 }
 
 // --- Main --------------------------------------------------------------------
@@ -297,6 +332,8 @@ int main(int argc, char** argv) {
     generateCharacters("Hest2", 210, 300),
     generateCharacters("Hest3", 20, 400),
     generateCharacters("Hest3", 220, 400),
+    generateCharacters("Hest4", 20, 500),
+    generateCharacters("Hest4", 240, 500),
     generateCharacters("Vest1", 500, 100),
     generateCharacters("Vest1", 500, 150),
     generateCharacters("Vest1", 500, 200),

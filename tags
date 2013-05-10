@@ -1,0 +1,15 @@
+Character	./word_clusters.cpp	/^} Character;$/
+Word	./word_clusters.cpp	/^} Word;$/
+bottomEdge	./tags	/^bottomEdge	.\/word_clusters.cpp	\/^double bottomEd/
+characterHorizontalDistance	./word_clusters.cpp	/^double characterHorizontalDistance(Character& a, C/
+clearCanvas	./word_clusters.cpp	/^void clearCanvas() {$/
+distance	./word_clusters.cpp	/^double distance(Word const a, Word const b) {$/
+drawCharacters	./word_clusters.cpp	/^void drawCharacters(std::vector<Character> charact/
+firstCharacter	./word_clusters.cpp	/^Character& firstCharacter(Word& word) {$/
+generateCharacters	./word_clusters.cpp	/^std::vector<Character> generateCharacters(char* st/
+getWordString	./word_clusters.cpp	/^const char* getWordString(Word word) {$/
+lastCharacter	./word_clusters.cpp	/^Character& lastCharacter(Word& word) {$/
+rc	./word_clusters.cpp	/^cv::Scalar rc() { \/\/ get a random pastel color$/
+topEdge	./word_clusters.cpp	/^double topEdge(Word& word) {$/
+wordHorizontalDistance	./word_clusters.cpp	/^double wordHorizontalDistance(Word& a, Word& b) {$/
+wordVerticalDistance	./word_clusters.cpp	/^double wordVerticalDistance(Word& a, Word& b) {$/
